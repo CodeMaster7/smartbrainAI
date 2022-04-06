@@ -1,4 +1,6 @@
 const express = require('express')
+const cors = require('cors')
+const bcrypt = require('bcrypt-nodejs')
 const app = express()
 
 // ===== CONNECTING DATABASE ===== //
@@ -26,6 +28,7 @@ const database = {
 // ===== TOP LEVEL MIDDLEWARE ===== //
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
+app.use(cors())
 
 // ====== ENDPOINTS ====== //
 // /--> res = returns 'this is working'
@@ -35,17 +38,26 @@ app.get('/', (req, res) => {
 
 // /signin --> POST = returns success/fail
 app.post('/signin', (req, res) => {
-    if (req.body.email === database.users[0].email && req.body.password === database.users[0].password) {
-        res.json('success')
-    } else {
-        res.status(400).json('error logging in')
-    }
+	// Load hash from your password DB.
+	bcrypt.compare('coco', '$2a$10$tT1puXFNX3CMb5wtTETiy.ZfOeUv39fOdetzj04.Lni3g8YwObCdq', function (err, res) {
+		console.log('first guess', res);
+	})
+	bcrypt.compare('veggies', '$2a$10$tT1puXFNX3CMb5wtTETiy.ZfOeUv39fOdetzj04.Lni3g8YwObCdq', function (err, res) {
+		console.log('second guess', res)
+	})
+
+	if (req.body.email === database.users[0].email && req.body.password === database.users[0].password) {
+		res.json('success')
+	} else {
+		res.status(404).json('error logging in')
+	}
 })
 
 // /register --> POST = returns user obj
 app.post('/register', (req, res) => {
     console.log(req.body);
     const { email, name, password } = req.body
+
     database.users.push({
 		id: '125',
 		name: name,
@@ -93,4 +105,4 @@ app.post('/image', (req, res) => {
 	}
 });
 
-app.listen(3000, () => console.log(`listening on port: ${3000}`))
+app.listen(5000, () => console.log(`listening on port: ${5000}`))
