@@ -8,8 +8,6 @@ class Register extends React.Component {
 			email: '',
 			Password: ''
 		}
-		console.log('this.props', this.props)
-		console.log('this', this)
 	}
 
 	onNameChange = (event) => {
@@ -25,8 +23,7 @@ class Register extends React.Component {
 	}
 
 	onSubmitSignIn = () => {
-		console.log('🚀 ~ Register ~ this.state', this.state)
-		fetch('http://localhost:5000/register', {
+		fetch('/register', {
 			method: 'post',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({

@@ -1,4 +1,7 @@
+require('dotenv').config()
+
 const express = require('express')
+const path = require('path')
 const cors = require('cors')
 const bcrypt = require('bcrypt-nodejs')
 const knex = require('knex')
@@ -8,16 +11,26 @@ const signin = require('./controllers/signin')
 const profile = require('./controllers/profile')
 const image = require('./controllers/image')
 
+const { SERVER_PORT, DATABASE_URL, DB_PASSWORD } = process.env
+
 // ===== CONNECTING DATABASE ===== //
 const db = knex({
-    client: 'pg',
-	connection: {
-        host: '127.0.0.1',
-		port: 5432,
-		user: 'codemaster',
-		password: 'root',
-		database: 'smart-brain'
-	}
+    dev: {
+        client: 'pg',
+        connection: {
+            host: '127.0.0.1',
+            port: 5432,
+            user: 'codemaster',
+            password: DB_PASSWORD,
+            database: 'smart-brain'
+        }
+    },
+    production: {
+        client: "pg",
+        connection: {
+            connectionString: DATABASE_URL
+        }
+    }
 })
 
 // ===== TOP LEVEL MIDDLEWARE ===== //
@@ -38,7 +51,17 @@ app.post('/register', register.handleRegister(db, bcrypt))
 // /profile/:userid --> GET = user obj
 app.get('/profile/:id', profile.handleProfile(db))
 // /image --> POST returns user obj
-app.put('/image', image.handleImage(db));
-app.post('/imageurl', image.handleApiCall);
+app.put('/image', image.handleImage(db))
+app.post('/imageurl', image.handleApiCall)
 
-app.listen(5000, () => console.log(`listening on port: ${5000}`))
+// Serve static assets in production
+if (process.env.NODE_ENV === 'production') {
+  // Set static folder
+  app.use(express.static('client/build'));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+  });
+}
+
+app.listen(process.env.PORT || SERVER_PORT, () => console.log(`listening on port: ${process.env.PORT}`))

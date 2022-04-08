@@ -7,8 +7,6 @@ class Signin extends React.Component {
 			signInEmail: '',
 			signInPassword: ''
 		}
-		console.log('this.props', this.props)
-		console.log('this', this)
 	}
 
 	onEmailChange = (event) => {
@@ -20,7 +18,7 @@ class Signin extends React.Component {
 	}
 
 	onSubmitSignIn = () => {
-		fetch('http://localhost:5000/signin', {
+		fetch('/signin', {
 			method: 'post',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
@@ -30,7 +28,6 @@ class Signin extends React.Component {
 		})
 			.then((response) => response.json())
 			.then((user) => {
-                console.log("🚀 ~ Signin ~ user", user)
 
 				if (user.id) {
 					this.props.loadUser(user)
