@@ -11,6 +11,11 @@
 # production
 /build
 
+# client
+client/build
+client/.eslintcache
+client/node_modules
+
 # misc
 .DS_Store
 .env
