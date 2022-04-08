@@ -1,31 +1,23 @@
 const express = require('express')
 const cors = require('cors')
 const bcrypt = require('bcrypt-nodejs')
-const app = express()
+const knex = require('knex')
+
 
 // ===== CONNECTING DATABASE ===== //
-const database = {
-	users: [
-		{
-			id: '123',
-			name: 'John',
-			email: 'john@gmail.com',
-			password: 'cookies',
-			entries: 0,
-			joined: new Date()
-		},
-		{
-			id: '124',
-			name: 'Sally',
-			email: 'sally@gmail.com',
-			password: 'milk',
-			entries: 0,
-			joined: new Date()
-		}
-	]
-}
+const db = knex({
+    client: 'pg',
+	connection: {
+        host: '127.0.0.1',
+		port: 5432,
+		user: 'codemaster',
+		password: 'root',
+		database: 'smart-brain'
+	}
+})
 
 // ===== TOP LEVEL MIDDLEWARE ===== //
+const app = express()
 app.use(express.urlencoded({ extended: false }))
 app.use(express.json())
 app.use(cors())
@@ -33,75 +25,93 @@ app.use(cors())
 // ====== ENDPOINTS ====== //
 // /--> res = returns 'this is working'
 app.get('/', (req, res) => {
-    res.send(database.users)
+    res.send('success!!')
 })
 
 // /signin --> POST = returns success/fail
 app.post('/signin', (req, res) => {
-	// Load hash from your password DB.
-	bcrypt.compare('coco', '$2a$10$tT1puXFNX3CMb5wtTETiy.ZfOeUv39fOdetzj04.Lni3g8YwObCdq', function (err, res) {
-		console.log('first guess', res);
-	})
-	bcrypt.compare('veggies', '$2a$10$tT1puXFNX3CMb5wtTETiy.ZfOeUv39fOdetzj04.Lni3g8YwObCdq', function (err, res) {
-		console.log('second guess', res)
-	})
-
-	if (req.body.email === database.users[0].email && req.body.password === database.users[0].password) {
-		res.json(database.users[0])
-	} else {
-		res.status(404).json('error logging in')
-	}
+	db.select('email', 'hash')
+		.from('login')
+		.where('email', '=', req.body.email)
+		.then((data) => {
+			const isValid = bcrypt.compareSync(req.body.password, data[0].hash)
+			if (isValid) {
+				return db
+					.select('*')
+					.from('users')
+					.where('email', '=', req.body.email)
+					.then((user) => {
+						res.json(user[0])
+					})
+					.catch((err) => res.status(400).json('unable to get user'))
+			} else {
+				res.status(400).json('wrong credentials')
+			}
+		})
+		.catch((err) => res.status(400).json('wrong credentials'))
 })
 
 // /register --> POST = returns user obj
 app.post('/register', (req, res) => {
-    console.log(req.body);
-    const { email, name } = req.body
+	const { name, email, password } = req.body
+	//Get the hash
+	const hash = bcrypt.hashSync(password)
 
-    database.users.push({
-		id: '125',
-		name: name,
-		email: email,
-		entries: 0,
-		joined: new Date()
-	})
-    // grab the laset item in the array
-    res.json(database.users[database.users.length - 1])
+	//Start transaction
+	db.transaction((trx) => {
+		//Insert into login table
+		trx.insert({
+			hash: hash,
+			email: email
+		})
+        .into('login')
+        .returning('email')
+        .then((loginEmail) => {
+			//Insert into users table
+			return trx('users')
+				.returning('*')
+				.insert({
+					email: loginEmail[0].email,
+					name: name,
+					joined: new Date()
+				})
+				.then((user) => {
+					res.json(user[0])
+				})
+		})
+        .then(trx.commit)
+        .catch(trx.rollback)
+	}).catch((err) => res.status(400).json('unable to register...'))
 })
 
 // /profile/:userid --> GET = user obj
 app.get('/profile/:id', (req, res) => {
-    console.log(req.params);
     const { id } = req.params
-    let found = false
 
-    database.users.forEach( user => {
-        if (user.id === id) {
-            found = true
-           return res.json(user)
-        }
-    })
-    if (!found) {
-        res.status(400).json('not found')
-    }
+    db.select('*').from('users')
+        .where({id: id})
+        .then(user => {
+            if (user.length) {
+                res.json(user[0])
+            } else {
+                res.status(400).json('user not found')
+            }
+        })
+        .catch(err => res.status(400).json('error getting user'))
 })
 
 // /image --> POST returns user obj
 app.put('/image', (req, res) => {
-    console.log(req.body)
     const { id } = req.body
-    let found = false
 
-    database.users.forEach((user) => {
-        if (user.id === id) {
-            found = true
-            user.entries++
-            return res.json(user.entries)
-        }
-    })
-    if (!found) {
-		res.status(400).json('not found')
-	}
+    db('users')
+		.where('id', '=', id)
+		.increment('entries', 1)
+		.returning('entries')
+		.then(entries => {
+			res.json(entries[0].entries)
+		})
+		.catch(err => res.status(400).json('unable to get count'))
 });
 
 app.listen(5000, () => console.log(`listening on port: ${5000}`))
