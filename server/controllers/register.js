@@ -1,6 +1,11 @@
 module.exports = {
 	handleRegister: (db, bcrypt) => (req, res) => {
 		const { name, email, password } = req.body
+
+        // if this is empty = true
+        if (!email || !name || !password) {
+            return res.status(404).json('incorrect form submission...')
+        }
 		//Get the hash
 		const hash = bcrypt.hashSync(password)
 
