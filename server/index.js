@@ -41,5 +41,6 @@ app.post('/register', register.handleRegister(db, bcrypt))
 app.get('/profile/:id', profile.handleProfile(db))
 // /image --> POST returns user obj
 app.put('/image', image.handleImage(db));
+app.post('/imageurl', image.handleApiCall);
 
 app.listen(5000, () => console.log(`listening on port: ${5000}`))
