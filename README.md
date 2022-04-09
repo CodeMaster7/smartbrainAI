@@ -1,6 +1,6 @@
 # Smart Brain AI
 
-![](demo.gif)
+![](demo-site.gif)
 
 
 ## What's inside?
