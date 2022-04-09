@@ -11,15 +11,11 @@ const image = require('./controllers/image')
 
 // ===== CONNECTING DATABASE ===== //
 const db = knex({
-        client: 'pg',
-        connection: {
-            host: '127.0.0.1',
-            port: 5432,
-            user: 'codemaster',
-            password: DB_PASSWORD,
-            database: 'smart-brain',
-            connectionString: DATABASE_URL
-        }
+	client: 'pg',
+	connection: {
+		connectionString: process.env.DATABASE_URL,
+        ssl: true
+	}
 })
 
 // ===== TOP LEVEL MIDDLEWARE ===== //
