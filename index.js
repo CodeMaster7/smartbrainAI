@@ -1,5 +1,3 @@
-require('dotenv').config()
-
 const express = require('express')
 const path = require('path')
 const cors = require('cors')
@@ -10,8 +8,6 @@ const register = require('./controllers/register')
 const signin = require('./controllers/signin')
 const profile = require('./controllers/profile')
 const image = require('./controllers/image')
-
-const { SERVER_PORT, DATABASE_URL, DB_PASSWORD } = process.env
 
 // ===== CONNECTING DATABASE ===== //
 const db = knex({
@@ -57,4 +53,4 @@ if (process.env.NODE_ENV === 'production') {
   });
 }
 
-app.listen(process.env.PORT || SERVER_PORT, () => console.log(`listening on port: ${process.env.PORT}`))
+app.listen(process.env.PORT || 5000, () => console.log(`listening on port: ${process.env.PORT}`))

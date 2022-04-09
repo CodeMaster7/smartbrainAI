@@ -1,4 +1,3 @@
-require('dotenv').config()
 const Clarifai = require('clarifai')
 
 const { CLARIFAI_API } = process.env
