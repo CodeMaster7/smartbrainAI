@@ -35,7 +35,7 @@ if (process.env.NODE_ENV === 'production') {
 
 // ====== ENDPOINTS ====== //
 // /--> res = returns 'this is working'
-// app.get('/', (req, res) => res.send('success!!'))
+app.get('/', (req, res) => res.send('success!!'))
 
 // /signin --> POST = returns success/fail
 // dependency ingection
