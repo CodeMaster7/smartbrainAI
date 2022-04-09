@@ -15,22 +15,15 @@ const { SERVER_PORT, DATABASE_URL, DB_PASSWORD } = process.env
 
 // ===== CONNECTING DATABASE ===== //
 const db = knex({
-    dev: {
         client: 'pg',
         connection: {
             host: '127.0.0.1',
             port: 5432,
             user: 'codemaster',
             password: DB_PASSWORD,
-            database: 'smart-brain'
-        }
-    },
-    production: {
-        client: "pg",
-        connection: {
+            database: 'smart-brain',
             connectionString: DATABASE_URL
         }
-    }
 })
 
 // ===== TOP LEVEL MIDDLEWARE ===== //
