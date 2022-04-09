@@ -23,11 +23,11 @@ class Register extends React.Component {
 	}
 
 	onSubmitSignIn = () => {
-		fetch('/register', {
+		fetch('https://sam-smart-brain-api.herokuapp.com/register', {
 			method: 'post',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({
-                name: this.state.name,
+				name: this.state.name,
 				email: this.state.email,
 				password: this.state.password
 			})
@@ -35,7 +35,7 @@ class Register extends React.Component {
 			.then((response) => response.json())
 			.then((user) => {
 				if (user.id) {
-                    this.props.loadUser(user)
+					this.props.loadUser(user)
 					this.props.onRouteChange('home')
 				}
 			})
