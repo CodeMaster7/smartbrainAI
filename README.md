@@ -3,7 +3,7 @@
 ![](demo-site.gif)
 ## Live Site
 For a quick preview of the site, click the link below:
-https://sam-smart-brain-api.herokuapp.com
+under construction
 
 ## What's inside?
 What's inside this app:
